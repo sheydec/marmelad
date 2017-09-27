@@ -571,9 +571,12 @@ gulp.task('marmelad:start', (done) => {
         'scripts:others',
         'styles:plugins',
         'stylus',
-        'bts' + settings.app.bts.use,
         'watch',
         done);
+
+    if (settings.app.bts.use) {
+        gulp.start(`bts${settings.app.bts.use}`);
+    }
 
 });
 
