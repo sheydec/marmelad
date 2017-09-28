@@ -574,7 +574,7 @@ gulp.task('marmelad:start', (done) => {
         'watch',
         done);
 
-    if (settings.app.bts.use) {
+    if (settings.app.bts && settings.app.bts.use) {
         gulp.start(`bts${settings.app.bts.use}`);
     }
 
