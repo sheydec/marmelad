@@ -111,6 +111,24 @@ gulp.task('nunjucks', (done) => {
                 env.addFilter('translit', (str) => translit(str).replace(/ /, '_').toLowerCase());
 
                 env.addFilter('limitTo', require('../modules/njk-limitTo'));
+
+                env.addFilter('bodyClass', (layout, additionalClasses = '', prefix = 'has-', postfix = '') => {
+
+                    let classes = [];
+
+                    if (additionalClasses.length > 1) {
+                        classes.push(additionalClasses);
+                    }
+
+                    for (let key in layout) {
+
+                        if (layout[key]) {
+                            classes.push(`${prefix}${key}${postfix}`);
+                        }
+                    }
+
+                    return classes.join(' ');
+                });
                 
                 return env;
             }
