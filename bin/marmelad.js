@@ -62,6 +62,7 @@ CLI
     .version(pkg.version)
     .option('-a, --auth [user@password]', `set user@password for authorization`)
     .option('-c, --clipboard', `copy server URL to clipboard on startup`)
+    .option('-b, --build', `enable build mode (optimizationa and etc.)`)
     .parse(process.argv);
 
 /**
