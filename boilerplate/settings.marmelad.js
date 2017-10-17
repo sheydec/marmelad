@@ -45,6 +45,68 @@ let app = {
     cssnano : {
         zIndex: false
     },
+    csscomb : {
+        "sort-order": [
+            [
+                'display',
+                'visibility',
+                'opacity',
+                "overflow",
+                "overflow-x",
+                "overflow-y",
+                "-ms-overflow-x",
+                "-ms-overflow-y",
+                "-webkit-overflow-scrolling",
+                "clip",
+                "zoom",
+            ],
+            [
+                "position",
+                "z-index",
+                "top",
+                "right",
+                "bottom",
+                "left"
+            ],
+            [
+                "width",
+                "min-width",
+                "max-width",
+                "height",
+                "min-height",
+                "max-height",
+                "margin",
+                "margin-top",
+                "margin-right",
+                "margin-bottom",
+                "margin-left",
+                "padding",
+                "padding-top",
+                "padding-right",
+                "padding-bottom",
+                "padding-left",
+                "-webkit-box-sizing",
+                "-moz-box-sizing",
+                "box-sizing",
+            ],
+            [
+                "font",
+                "font-family",
+                "font-size",
+                "font-weight",
+                "font-style",
+                "font-variant",
+                "font-size-adjust",
+                "font-stretch",
+                "font-effect",
+                "font-emphasize",
+                "font-emphasize-position",
+                "font-emphasize-style",
+                "font-smooth",
+                "line-height"
+            ]
+        ],
+    },
     beml        : {
         elemPrefix: '__',
         modPrefix : '--',
