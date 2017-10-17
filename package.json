@@ -47,7 +47,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "autoprefixer": "7.1.3",
+    "autoprefixer": "7.1.5",
     "babel-core": "^6.26.0",
     "babel-plugin-transform-object-assign": "6.22.0",
     "babel-preset-es2015": "6.24.1",
@@ -89,14 +89,14 @@
     "gulp-util": "3.0.8",
     "gulp-watch": "4.3.11",
     "gulp-wrap": "0.13.0",
-    "js-beautify": "^1.6.14",
+    "js-beautify": "^1.7.4",
     "pipe-error-stop": "0.0.11",
     "postcss-discard-comments": "2.0.4",
     "postcss-flexbugs-fixes": "3.2.0",
-    "postcss-focus": "2.0.0",
+    "postcss-focus": "3.0.0",
     "posthtml-bem": "^0.2.2",
     "posthtml-postcss": "^0.2.5",
-    "run-sequence": "2.1.0",
+    "run-sequence": "2.2.0",
     "translit": "0.0.1",
     "translit-russian": "0.0.2"
   }
