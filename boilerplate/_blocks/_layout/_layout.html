@@ -37,7 +37,7 @@
 
     </head>
 
-    <body block="app" mods="{{ bodyMods }}" mix="block:{{bodyClasses}}">
+    <body block="app" mods="{{ bodyMods }}" class="{{ layout | bodyClass(bodyClasses) }}">
 
         <!--[if lte IE 9]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
