@@ -28,6 +28,7 @@ const stylus            = require('gulp-stylus');
 const postcss           = require('gulp-postcss');
 const focus             = require('postcss-focus');
 const flexBugsFixes     = require('postcss-flexbugs-fixes');
+const csscomb           = require('postcss-csscomb');
 const autoprefixer      = require('autoprefixer');
 const cssnano           = require('cssnano');
 const sass              = require('gulp-sass');
@@ -369,6 +370,9 @@ gulp.task('stylus', (done) => {
             flexBugsFixes(),
             autoprefixer(settings.app.autoprefixer)
         ]))
+        .pipe(gif(CLI.build, postcss([
+            csscomb(settings.app.csscomb)
+        ])))
         .pipe(gif('*.min.css', postcss([
             cssnano(settings.app.cssnano)
         ])))
