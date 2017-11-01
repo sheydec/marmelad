@@ -455,7 +455,7 @@ gulp.task('bts4:js', (done) => {
   });
 });
 
-gulp.task('watch', () => {
+gulp.task('watch', (done) => {
   /* СТАТИКА */
   watch([
     path.join(settings.paths.static, '**', '*.*'),
@@ -466,58 +466,59 @@ gulp.task('watch', () => {
       stabilityThreshold: 1000,
       pollInterval: 500,
     },
-  }, batch((events, done) => {
-    gulp.start('static', done);
+  }, batch((events, complete) => {
+    gulp.start('static', complete);
   }));
 
   /* STYLUS */
   watch([
     path.join(settings.paths._blocks, '**', '*.styl'),
     path.join(settings.paths.stylus, '**', '*.styl'),
-  ], batch((events, done) => {
-    gulp.start('stylus', done);
+  ], batch((events, complete) => {
+    gulp.start('stylus', complete);
   }));
 
   /* СКРИПТЫ */
-  watch(path.join(settings.paths.js.vendors, '**', '*.js'), batch((events, done) => {
-    gulp.start('scripts:vendors', done);
+  watch(path.join(settings.paths.js.vendors, '**', '*.js'), batch((events, complete) => {
+    gulp.start('scripts:vendors', complete);
   }));
 
-  watch(path.join(settings.paths.js.plugins, '**', '*.js'), batch((events, done) => {
-    gulp.start('scripts:plugins', done);
+  watch(path.join(settings.paths.js.plugins, '**', '*.js'), batch((events, complete) => {
+    gulp.start('scripts:plugins', complete);
   }));
-  watch(path.join(settings.paths.js.plugins, '**', '*.css'), batch((events, done) => {
-    gulp.start('styles:plugins', done);
+  watch(path.join(settings.paths.js.plugins, '**', '*.css'), batch((events, complete) => {
+    gulp.start('styles:plugins', complete);
   }));
 
-  watch(path.join(settings.paths._blocks, '**', '*.js'), batch((events, done) => {
-    gulp.start('scripts:others', done);
+  watch(path.join(settings.paths._blocks, '**', '*.js'), batch((events, complete) => {
+    gulp.start('scripts:others', complete);
   }));
-  watch(path.join(settings.paths.js.src, '*.js'), batch((events, done) => {
-    gulp.start('scripts:others', done);
+  watch(path.join(settings.paths.js.src, '*.js'), batch((events, complete) => {
+    gulp.start('scripts:others', complete);
   }));
 
   /* NunJucks Pages */
-  watch(path.join(settings.paths._pages, '**', '*.html'), batch((events, done) => {
-    gulp.start('nunjucks', done);
+  watch(path.join(settings.paths._pages, '**', '*.html'), batch((events, complete) => {
+    gulp.start('nunjucks', complete);
   }));
 
   /* NunJucks Blocks */
-  watch([path.join(settings.paths._blocks, '**', '*.html')], batch((events, done) => {
+  watch([path.join(settings.paths._blocks, '**', '*.html')], batch((events, complete) => {
     isNunJucksUpdate = true;
-    gulp.start('nunjucks', done);
+    gulp.start('nunjucks', complete);
   }));
 
   /* NunJucks database */
-  watch(path.join(settings.paths.marmelad, 'data.marmelad.js'), batch((events, done) => {
-    gulp.start('db:update', done);
+  watch(path.join(settings.paths.marmelad, 'data.marmelad.js'), batch((events, complete) => {
+    gulp.start('db:update', complete);
   }));
-
 
   /* Iconizer */
-  watch(path.join(settings.paths.iconizer.icons, '*.svg'), batch((events, done) => {
-    gulp.start('iconizer:update', done);
+  watch(path.join(settings.paths.iconizer.icons, '*.svg'), batch((events, complete) => {
+    gulp.start('iconizer:update', complete);
   }));
+
+  done();
 });
 
 /**
