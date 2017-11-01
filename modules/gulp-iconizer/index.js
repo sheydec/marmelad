@@ -3,119 +3,144 @@
  * Licensed under the MIT license.
  */
 
-'use strict';
+const fs = require('fs');
+const through = require('through2');
+const gutil = require('gulp-util');
 
-const fs          = require('fs');
-const through     = require('through2');
-const gutil       = require('gulp-util');
-const PluginError = gutil.PluginError;
+/**
+ * Оборачивает SVG иконку в блок с классом для анимации вращения
+ *
+ * @param {string} html HTML код SVG иконки
+ * @param {string} classes список CSS классов
+ * @returns {string} HTML код
+ */
+function wrapSpinner(html, classes, opts) {
+  if (classes.indexOf('spinner') > -1) {
+    return `<${opts.tag} class="svg-icon${opts._beml.elemPrefix}spinner">${html}</${opts.tag}>`;
+  }
 
+  return html;
+}
+
+/**
+ * Возвращает подготовленный HTML код иконки
+ *
+ * @param {string} name название иконки
+ * @param {Object} opts опции для иконки
+ * @returns {string} HTML код
+ */
 function icon(name, opts) {
+  Object.assign(opts, {
+    tag: 'div',
+    class: '',
+  });
 
-    opts = opts || {};
+  const size = opts.size ? `svg-icon${opts._beml.modPrefix}${opts.size}` : '';
+  const classes = `svg-icon svg-icon${opts._beml.modPrefix}${name} ${size} ${opts.class}`.trim();
+  const iconHtml = `<svg class="svg-icon${opts._beml.elemPrefix}link"><use xlink:href="#${name}" /></svg>`;
 
-    let size    = opts.size ? `svg-icon${opts._beml.modPrefix}${opts.size}` : '';
-    let classes = `svg-icon svg-icon${opts._beml.modPrefix}${name} ${size} ${(opts.class || '')}`;
-
-    classes     = classes.trim();
-
-    opts.tag = (typeof opts.tag === 'undefined') ? 'div' : opts.tag;
-
-    let icon = `<svg class="svg-icon${opts._beml.elemPrefix}link"><use xlink:href="#${name}" /></svg>`;
-
-    return `<${opts.tag} class="${classes}">${wrapSpinner(icon, classes, opts)}</${opts.tag}>`;
-
+  return `<${opts.tag} class="${classes}">${wrapSpinner(iconHtml, classes, opts)}</${opts.tag}>`;
 }
 
-function wrapSpinner(html, klass, opts) {
 
-    if (klass.indexOf('spinner') > -1) {
-        return `<${opts.tag} class="svg-icon${opts._beml.elemPrefix}spinner">${html}</${opts.tag}>`;
-    } else {
-        return html;
+/**
+ * Возвращает объект параметров полученный из строки с атрибутами иконки
+ *
+ * @param {string} attrs атрибуты иконки
+ * @returns {Object} объект полученный из строки с атрибутами иконки
+ */
+function buildParamsFromAttrs(attrs) {
+  const params = {};
+  const attrsRegexp = /(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?/gi;
+  const match = attrs.match(attrsRegexp);
+
+  let attr = null;
+  let value = null;
+
+  match.forEach((param) => {
+    [attr, value] = param.split('=');
+    params[attr] = value.replace(/'|"/g, '');
+  });
+
+  return params;
+}
+
+/**
+ * Замена шаблонов иконок на HTML код
+ *
+ * @param {string} source HTML код с шаблоками иконок
+ * @returns {string} HTML c уже обработанными шаблонами иконок
+ */
+function replaceIconTags(source, opts) {
+  // TODO: тут с регекспами надо поработать
+  const iconRegexp = /<icon\s+([-=\w\d\c{}'"\s]+)\s*\/?>|<\/icon>/gi;
+  const iconsInHtml = source.match(iconRegexp);
+
+  let html = source;
+  let params = {};
+
+  iconsInHtml.forEach((iconSource) => {
+    params = buildParamsFromAttrs(iconSource.match(/\s(\w+?)="(.+?)*"/gi)[0]);
+
+    Object.assign(params, opts);
+
+    html = html.replace(iconSource, icon(params.name, params));
+  });
+
+  return html;
+}
+
+
+/**
+ * Возвращает текст c уже обработанными шаблонами иконок
+ *
+ * @param {string} src текст с шаблонами иконок
+ * @param {Object} options опции модуля
+ */
+function iconizeHtml(src, options) {
+  let sprite = fs.readFileSync(options.path).toString();
+  let html = src.toString();
+
+  if (html.indexOf(sprite) === -1) {
+    sprite = sprite.replace(/\n/g, '');
+    sprite = sprite.replace(/<defs[\s\S]*?\/defs><path[\s\S]*?\s+?d=/g, '<path d=');
+    sprite = sprite.replace(/<style[\s\S]*?\/style><path[\s\S]*?\s+?d=/g, '<path d=');
+    sprite = sprite.replace(/\sfill[\s\S]*?(['"])[\s\S]*?\1/g, '');
+    sprite = sprite.replace(/(['"])[\s\S]*?\1/, match => `${match}class="app-svg-sprite"`);
+    html = html.replace(/<body.*?>/, match => `${match}\n\n${sprite}\n`);
+  }
+
+  return replaceIconTags(html);
+}
+
+/**
+ * Превращаем шаблоны иконок в HTML код :)
+ */
+module.exports = function iconizer(opts) {
+  return through.obj(function obj(file, enc, cb) {
+    if (file.isNull()) {
+      cb(null, file);
+      return;
     }
-}
 
-function buildParamsFromString(string) {
-
-    let match, attr, value;
-    let params = {};
-    let attrsRegexp = /(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?/gi;
-
-    while (match = attrsRegexp.exec(string)) {
-        attr  = match[1];
-        value = match[2].replace(/'|"/, '');
-        params[attr] = value;
+    if (file.isStream()) {
+      cb(new gutil.PluginError('gulp-iconizer', 'Streaming not supported'));
+      return;
     }
 
-    return params;
-}
+    try {
+      Object.assign({
+        elemPrefix: '__',
+        modPrefix: '--',
+        modDlmtr: '-',
+      }, opts);
 
-function replaceIconTags(src, opts) {
-
-    let match, tag, params, name;
-    let html = src.toString();
-    let iconRegexp = /<icon\s+([-=\w\d\c{}'"\s]+)\s*\/?>|<\/icon>/gi;
-
-    while (match = iconRegexp.exec(html)) {
-        tag     = match[0];
-        params  = buildParamsFromString(match[1]);
-        name    = params.name;
-
-        delete params.name;
-
-        Object.assign(params, opts);
-
-        html = html.replace(tag, icon(name, params));
+      file.contents = Buffer.from(iconizeHtml(file.contents, opts));
+      this.push(file);
+    } catch (err) {
+      this.emit('error', new gutil.PluginError('gulp-iconizer', err));
     }
 
-    return html;
-}
-
-function iconizeHtml(src, opts) {
-
-    let sprite = fs.readFileSync(opts.path).toString();
-
-    let html = src.toString();
-
-    if (html.indexOf(sprite) === -1) {
-        sprite = sprite.replace(/\n/g,'');
-        sprite = sprite.replace(/<defs[\s\S]*?\/defs><path[\s\S]*?\s+?d=/g, '<path d=');
-        sprite = sprite.replace(/<style[\s\S]*?\/style><path[\s\S]*?\s+?d=/g, '<path d=');
-        sprite = sprite.replace(/\sfill[\s\S]*?(['"])[\s\S]*?\1/g, '');
-        sprite = sprite.replace(/(['"])[\s\S]*?\1/, function(match) { return match + ' class="main-svg-sprite"' });
-        html = html.replace(/<body.*?>/, function(match) { return `${match}\n\n    ${sprite}\n` });
-    }
-
-    return replaceIconTags(html, opts);
-}
-
-module.exports = function(opts) {
-
-    return through.obj(function(file, enc, cb) {
-
-        Object.assign({
-            elemPrefix: '__',
-            modPrefix : '--',
-            modDlmtr  : '-'
-        }, opts);
-
-        if (file.isNull()) {
-            cb(null, file);
-        }
-
-        let html = iconizeHtml(file.contents, opts);
-
-        if (file.isBuffer()) {
-            file.contents = new Buffer(html);
-        }
-
-        if (file.isStream()) {
-            this.emit('error', new PluginError('gulp-iconizer', 'Streaming not supported'));
-            return cb();
-        }
-
-        this.push(file);
-        cb(null, file);
-    });
+    cb();
+  });
 };
