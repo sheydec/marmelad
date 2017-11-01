@@ -1,7 +1,5 @@
-'use strict';
-
-const gutil    = require('gulp-util');
-const through  = require('through2');
+const gutil = require('gulp-util');
+const through = require('through2');
 const beautify = require('js-beautify');
 const condense = require('condense-newlines');
 
@@ -28,17 +26,16 @@ function pretty(str, opts) {
         indent_inner_html: true,
         indent_char: ' ',
         indent_size: 2,
-        sep: '\n'
+        sep: '\n',
     }, opts);
-  
+
     str = beautify.html(str, opts);
 
     if (opts.ocd === true) {
-
         if (opts.newlines) {
             opts.sep = opts.newlines;
         }
-        
+
         return ocd(str, opts);
     }
 
