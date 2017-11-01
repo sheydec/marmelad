@@ -26,6 +26,7 @@ const stylus = require('gulp-stylus');
 const postcss = require('gulp-postcss');
 const focus = require('postcss-focus');
 const flexBugsFixes = require('postcss-flexbugs-fixes');
+const momentumScrolling = require('postcss-momentum-scrolling');
 const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
 const sass = require('gulp-sass');
@@ -310,6 +311,13 @@ gulp.task('styles:plugins', (done) => {
  * сборка стилей блоков, для каждого отдельный css
  */
 gulp.task('stylus', (done) => {
+  const postcssPlugins = [
+    momentumScrolling({ short: true }),
+    focus(),
+    flexBugsFixes(),
+    autoprefixer(settings.app.autoprefixer),
+  ];
+
   const $data = {
     beml: settings.app.beml,
   };
@@ -323,11 +331,7 @@ gulp.task('stylus', (done) => {
       rawDefine: { $data },
     }))
     .pipe(groupMQ())
-    .pipe(postcss([
-      focus(),
-      flexBugsFixes(),
-      autoprefixer(settings.app.autoprefixer),
-    ]))
+    .pipe(postcss(postcssPlugins))
     .pipe(gif('*.min.css', postcss([
       cssnano(settings.app.cssnano),
     ])))
