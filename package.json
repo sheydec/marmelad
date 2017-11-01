@@ -96,6 +96,7 @@
     "posthtml-bem": "^0.2.2",
     "posthtml-postcss": "^0.2.5",
     "run-sequence": "^2.2.0",
+    "through2": "^2.0.3",
     "translit": "0.0.1",
     "translit-russian": "0.0.2"
   },
