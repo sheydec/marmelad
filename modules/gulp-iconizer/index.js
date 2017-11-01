@@ -30,11 +30,6 @@ function wrapSpinner(html, classes, opts) {
  * @returns {string} HTML код
  */
 function icon(name, opts) {
-  Object.assign(opts, {
-    tag: 'div',
-    class: '',
-  });
-
   const size = opts.size ? `svg-icon${opts._beml.modPrefix}${opts.size}` : '';
   const classes = `svg-icon svg-icon${opts._beml.modPrefix}${name} ${size} ${opts.class}`.trim();
   const iconHtml = `<svg class="svg-icon${opts._beml.elemPrefix}link"><use xlink:href="#${name}" /></svg>`;
@@ -50,17 +45,22 @@ function icon(name, opts) {
  * @returns {Object} объект полученный из строки с атрибутами иконки
  */
 function buildParamsFromAttrs(attrs) {
-  const params = {};
+  const params = {
+    tag: 'div',
+    class: '',
+  };
   const attrsRegexp = /(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?/gi;
   const match = attrs.match(attrsRegexp);
 
   let attr = null;
   let value = null;
 
-  match.forEach((param) => {
-    [attr, value] = param.split('=');
-    params[attr] = value.replace(/'|"/g, '');
-  });
+  if (match) {
+    match.forEach((param) => {
+      [attr, value] = param.split('=');
+      params[attr] = value.replace(/'|"/g, '');
+    });
+  }
 
   return params;
 }
@@ -79,13 +79,15 @@ function replaceIconTags(source, opts) {
   let html = source;
   let params = {};
 
-  iconsInHtml.forEach((iconSource) => {
-    params = buildParamsFromAttrs(iconSource.match(/\s(\w+?)="(.+?)*"/gi)[0]);
+  if (iconsInHtml) {
+    iconsInHtml.forEach((iconSource) => {
+      params = buildParamsFromAttrs(iconSource.match(/\s(\w+?)="(.+?)*"/gi)[0]);
 
-    Object.assign(params, opts);
+      Object.assign(params, opts);
 
-    html = html.replace(iconSource, icon(params.name, params));
-  });
+      html = html.replace(iconSource, icon(params.name, params));
+    });
+  }
 
   return html;
 }
@@ -97,8 +99,8 @@ function replaceIconTags(source, opts) {
  * @param {string} src текст с шаблонами иконок
  * @param {Object} options опции модуля
  */
-function iconizeHtml(src, options) {
-  let sprite = fs.readFileSync(options.path).toString();
+function iconizeHtml(src, opts) {
+  let sprite = fs.readFileSync(opts.path).toString();
   let html = src.toString();
 
   if (html.indexOf(sprite) === -1) {
@@ -110,7 +112,7 @@ function iconizeHtml(src, options) {
     html = html.replace(/<body.*?>/, match => `${match}\n\n${sprite}\n`);
   }
 
-  return replaceIconTags(html);
+  return replaceIconTags(html, opts);
 }
 
 /**
@@ -129,12 +131,6 @@ module.exports = function iconizer(opts) {
     }
 
     try {
-      Object.assign({
-        elemPrefix: '__',
-        modPrefix: '--',
-        modDlmtr: '-',
-      }, opts);
-
       file.contents = Buffer.from(iconizeHtml(file.contents, opts));
       this.push(file);
     } catch (err) {
