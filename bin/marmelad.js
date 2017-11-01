@@ -560,7 +560,7 @@ gulp.task('marmelad:init', (done) => {
   stream.on('end', () => {
     console.log(boxen(`${chalk.bold.yellow(pkg.name.toUpperCase())} v${pkg.version}\nBoilerplate successfully copied\n\ntype ${pkg.name} --help for CLI help`, {
       padding: 1,
-      margin: 1,
+      margin: 0,
       borderStyle: 'double',
       borderColor: 'yellow',
     }));
