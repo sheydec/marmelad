@@ -100,10 +100,10 @@ let app = {
     bts : {
         use: 4,
         4: {
-            code: '4.0.0-beta',
+            code: '4.0.0-beta.2',
             src : {
-                css: path.join(paths.marmelad, 'bootstrap', '4.0.0-beta'),
-                js: path.join(paths.marmelad, 'bootstrap', '4.0.0-beta'),
+                css: path.join(paths.marmelad, 'bootstrap', '4.0.0-beta.2'),
+                js: path.join(paths.marmelad, 'bootstrap', '4.0.0-beta.2'),
             },
             dest: {
                 css: path.join(paths.storage, 'bootstrap', 'css'),
