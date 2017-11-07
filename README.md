@@ -6,8 +6,20 @@
 
 ## Содержание
 
+- [Подготовка](#Подготовка)
 - [Для Староверов](#Для-Староверов)
 - [Шаблоны](#Шаблоны)
+
+## Подготовка
+
+### .editorconfig
+
+Для поддержки редактором `.editorconfig` необходимо установить плагины:
+
+- Sublime Text 3 [editorconfig-sublime](https://github.com/sindresorhus/editorconfig-sublime)
+- VSCode [EditorConfig for VS Code](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)
+
+*актуально и для разработки самого `marmelad`*
 
 ## Шаблоны
 
