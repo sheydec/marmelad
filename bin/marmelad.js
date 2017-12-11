@@ -59,8 +59,8 @@ const getNunJucksBlocks = blocksPath => fs.readdirSync(blocksPath).map(el => `${
 CLI
   .version(pkg.version)
   .option('-a, --auth [user@password]', 'set user@password for authorization')
-  .option('-c, --clipboard', 'copy server URL to clipboard on startup')
-  .parse(process.argv);
+  .option('-c, --clipboard', 'copy server URL to clipboard on startup');
+
 // создание страницы
 CLI
   .command('cp <name>')
@@ -84,6 +84,10 @@ CLI
   .on('--help', () => {
     console.log();
   });
+
+// парсим аргументы командной строки (старт модуля)
+CLI.parse(process.argv);
+
 /**
  * Проверка правильности установки логина и пароля для авторизации
  */
