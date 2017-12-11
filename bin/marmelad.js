@@ -61,6 +61,16 @@ CLI
   .option('-a, --auth [user@password]', 'set user@password for authorization')
   .option('-c, --clipboard', 'copy server URL to clipboard on startup')
   .parse(process.argv);
+// создание страницы
+CLI
+  .command('cp <name>')
+  .description('Create new page')
+  .action((pageName) => {
+    require('../commands/cp')(pageName);
+  })
+  .on('--help', () => {
+    console.log();
+  });
 
 /**
  * Проверка правильности установки логина и пароля для авторизации
