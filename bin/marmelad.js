@@ -72,6 +72,18 @@ CLI
     console.log();
   });
 
+
+// создание блока
+CLI
+  .command('cb <name>')
+  .description('Create new block')
+  .option('-t, --techs [html,js,styl]', 'Files exxtensions for new block', 'html,js,styl')
+  .action((pageName, opts) => {
+    require('../commands/cb')(pageName, opts.techs);
+  })
+  .on('--help', () => {
+    console.log();
+  });
 /**
  * Проверка правильности установки логина и пароля для авторизации
  */
