@@ -67,8 +67,6 @@ let isNunJucksUpdate = false;
  * NUNJUCKS
  */
 gulp.task('nunjucks', (done) => {
-  console.log(database);
-
   const htmlPlugins = [
     require('posthtml-bem')(settings.app.beml),
     require('posthtml-postcss')([
@@ -167,10 +165,8 @@ gulp.task('iconizer', (done) => {
     .pipe(gulp.dest('.'));
 
   stream.on('end', () => {
-    Object.assign(database, {
-      app: {
-        icons: getIconsNamesList(settings.paths.iconizer.icons),
-      },
+    Object.assign(database.app, {
+      icons: getIconsNamesList(settings.paths.iconizer.icons),
     });
 
     gutil.log(`Iconizer ............................ ${chalk.bold.green('Done')}`);
