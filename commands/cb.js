@@ -7,7 +7,7 @@ module.exports = (name, techs) => {
 
   if (fs.existsSync(blockPath)) {
     console.log();
-    process.stdout.write(`block ${blockPath} is already exists`);
+    process.stdout.write(`${blockPath} is already exists`);
   } else {
     fs.mkdirSync(blockPath);
 
@@ -15,7 +15,7 @@ module.exports = (name, techs) => {
       fs.writeFileSync(path.join(blockPath, `${name}.${ext}`), '', { encoding: 'utf8' });
     });
 
-    process.stdout.write(`block ${blockPath} is created`);
+    process.stdout.write(`${blockPath} is created`);
   }
 
   process.exit();

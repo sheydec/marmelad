@@ -55,3 +55,5 @@
 ```
 
 > И, о Да, он работает :)
+
+Иконки от автора [Dimitry Miroliubov](https://www.flaticon.com/authors/dimitry-miroliubov)
