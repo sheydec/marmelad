@@ -1,41 +1,41 @@
 <!doctype html>
 <html lang="{{app.lang}}">
 
-    <head>
+  <head>
 
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta http-equiv="cleartype" content="on">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="cleartype" content="on">
 
-        <meta name="theme-color" content="{{ app.stylus.theme_color }}">
+    <meta name="theme-color" content="{{ app.stylus.theme_color }}">
 
-        <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
-        <meta name="format-detection" content="telephone=no">
+    <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+    <meta name="format-detection" content="telephone=no">
 
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <meta name="msapplication-tap-highlight" content="no">
+    <meta name="msapplication-tap-highlight" content="no">
 
-        <meta name="mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 
-        <meta name="MobileOptimized" content="320">
-        <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="HandheldFriendly" content="True">
 
-        <link rel="apple-touch-icon" href="apple-touch-icon.png">
-        <link rel="icon" href="favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
-        <title>{{ pageTitle}} - {{ app.package.name | capitalize}} v{{ app.package.version }}</title>
+    <title>{{ pageTitle}} - {{ app.package.name | capitalize}} v{{ app.package.version }}</title>
 
 
-        <link rel="stylesheet" href="{{app.storage}}/bootstrap/css/bootstrap.css">
-        <link rel="stylesheet" href="{{app.storage}}/css/style.css">
+    <link rel="stylesheet" href="{{app.storage}}/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="{{app.storage}}/css/style.css">
 
-        {# <script src="{{app.storage}}/js/vendors/modernizr.js" async></script>
-        <script src="{{app.storage}}/js/vendors/pep-0.4.2.min.js" async></script> #}
+    {# <script src="{{app.storage}}/js/vendors/modernizr.js" async></script>
+    <script src="{{app.storage}}/js/vendors/pep-0.4.2.min.js" async></script> #}
 
-    </head>
+  </head>
 
     <body block="app" mods="{{ bodyMods }}" mix="block:{{bodyClasses}}">
 
@@ -44,7 +44,7 @@
         <![endif]-->
 
         <div elem="wrapper" mix="block:{{scrollFixClasses}}">
-            
+
             {% if layout.header %}
             {% include 'app-header.html' %}
             {% endif %}
@@ -54,7 +54,7 @@
                 <main elem="main">
                     {% block main %}{% endblock %}
                 </main><!-- e:main -->
-                
+
                 {% if layout.left %}
                 <aside elem="aside" mods="left">
                     {% block asideLeft %}{% endblock %}
@@ -68,7 +68,7 @@
                 {% endif %}
 
             </div><!-- b:m-content -->
-            
+
             {% if layout.footer %}
             {% include 'app-footer.html' %}
             {% endif %}
@@ -79,8 +79,9 @@
 
         {# https://github.com/yunusga/forceFeed
         https://css-tricks.com/handling-long-unexpected-content-css/ #}
-        
+
         <script src="{{app.storage}}/js/vendors/forceFeed.js"></script>
+
         <script>
         window.words = ['БЭМ', 'браузер', 'Сетка', 'CSS-препроцессор', 'методология', 'интерфейс', 'компонент', 'пример', 'вёрстка', 'сайт', 'разработка'];
         window.sentences = [
@@ -102,8 +103,7 @@
         </script>
 
         <script src="{{app.storage}}/js/vendors/jquery-3.2.1.min.js"></script>
-        <script src="{{app.storage}}/bootstrap/js/popper.min.js"></script>
-        <script src="{{app.storage}}/bootstrap/js/bootstrap.min.js"></script>
+        <script src="{{app.storage}}/bootstrap/js/bootstrap.bundle.min.js"></script>
         <script src="{{app.storage}}/js/plugins.min.js"></script>
         <script src="{{app.storage}}/js/app.js"></script>
 
