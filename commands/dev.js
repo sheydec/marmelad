@@ -154,7 +154,6 @@ gulp.task('db', (done) => {
  * DB:update
  */
 gulp.task('db:update', (done) => {
-  // runSequence('db', 'stylus', 'nunjucks', done);
   gulp.series('db', 'stylus', 'nunjucks')(done);
 });
 
