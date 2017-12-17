@@ -383,19 +383,6 @@ gulp.task('server:static', (done) => {
  ==================================================================== */
 gulp.task('bootstrap', (done) => {
   if (settings.bootstrap.use) {
-    gulp.parallel('bts4:sass', 'bts4:js')(done);
-
-    /* SCSS */
-    gulp.watch(
-      path.join(settings.bootstrap.opts.src.scss, '**', '*.scss'),
-      gulp.parallel('bts4:sass'),
-    );
-
-    /* JS */
-    gulp.watch(
-      path.join(settings.bootstrap.opts.src.js, '**', '*.js'),
-      gulp.parallel('bts4:js'),
-    );
   }
 });
 
@@ -442,6 +429,23 @@ gulp.task('watch', (done) => {
     ],
     usePolling: true,
   };
+
+  /* bootstrap */
+  if (settings.bootstrap.use) {
+    /* SCSS */
+    gulp.watch(
+      path.join(settings.bootstrap.opts.src.scss, '**', '*.scss'),
+      watchOpts,
+      gulp.parallel('bts4:sass'),
+    );
+
+    /* JS */
+    gulp.watch(
+      path.join(settings.bootstrap.opts.src.js, '**', '*.js'),
+      watchOpts,
+      gulp.parallel('bts4:js'),
+    );
+  }
 
   /* СТАТИКА */
   gulp.watch(
