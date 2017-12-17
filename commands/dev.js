@@ -383,6 +383,9 @@ gulp.task('server:static', (done) => {
  ==================================================================== */
 gulp.task('bootstrap', (done) => {
   if (settings.bootstrap.use) {
+    gulp.series('bts4:sass', 'bts4:js')(done);
+  } else {
+    done();
   }
 });
 
