@@ -16,4 +16,4 @@ gulp.task('init:marmelad', (done) => {
   });
 });
 
-gulp.start('init:marmelad');
+gulp.series('init:marmelad')();
