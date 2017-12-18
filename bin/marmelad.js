@@ -40,7 +40,7 @@ CLI
   .option('-o, --open [browser]', 'Open browser on startup')
   .action((dev) => {
     require('../modules/tci').run();
-    require('../commands/dev');
+    require('../commands/dev')(dev);
   })
   .on('--help', () => {
     console.log();
