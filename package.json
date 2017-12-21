@@ -120,5 +120,8 @@
       "no-underscore-dangle": 0,
       "global-require": 0
     }
+  },
+  "scripts": {
+    "refresh": "rm -rf node_modules/ && rm -f package-lock.json && npm install && npm link"
   }
 }
