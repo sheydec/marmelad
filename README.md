@@ -57,3 +57,7 @@
 > И, о Да, он работает :)
 
 Иконки от автора [Dimitry Miroliubov](https://www.flaticon.com/authors/dimitry-miroliubov)
+
+## Roadmap
+
+- `stylus` Добавить миксин для перекрашивания инлайновых SVG иконок
