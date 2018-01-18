@@ -1,6 +1,4 @@
-# marmelad <sup>[4.13.5](https://github.com/yunusga/marmelad/blob/master/CHANGELOG.md#4135-21092017)</sup>
-
-[![GitHub tag](https://img.shields.io/github/tag/yunusga/marmelad.svg)](https://github.com/yunusga/marmelad/releases/tag/v4.13.5) [![license](https://img.shields.io/github/license/yunusga/marmelad.svg)](https://github.com/yunusga/marmelad/blob/master/LICENSE)
+# marmelad
 
 > Сборщик статичных сайтов на базе Gulp
 
