@@ -58,8 +58,10 @@ const app = {
   },
   autoprefixer: {
     browsers: [
+      'last 2 major version',
+      '>= 1%',
       'Chrome >= 45',
-      'Firefox ESR',
+      'Firefox >= 38',
       'Edge >= 12',
       'Explorer >= 10',
       'iOS >= 9',
@@ -94,7 +96,7 @@ const app = {
       xmlDeclaration: false, // strip out the XML attribute
       doctypeDeclaration: false, // don't include the !DOCTYPE declaration
     },
-  }
+  },
 };
 
 const bootstrap = {
@@ -113,18 +115,7 @@ const bootstrap = {
       precision: 6,
       outputStyle: 'expanded',
     },
-    autoprefixer: {
-      browsers: [
-        "Chrome >= 45",
-        "Firefox ESR",
-        "Edge >= 12",
-        "Explorer >= 10",
-        "iOS >= 9",
-        "Safari >= 9",
-        "Android >= 4.4",
-        "Opera >= 30"
-      ],
-    },
+    autoprefixer: app.autoprefixer,
   },
 };
 
@@ -132,5 +123,5 @@ module.exports = {
   folders,
   app,
   paths,
-  bootstrap
+  bootstrap,
 };
