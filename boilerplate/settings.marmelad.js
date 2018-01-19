@@ -102,10 +102,10 @@ const app = {
 const bootstrap = {
   use: true,
   opts: {
-    code: '4.0.0-beta.3',
+    code: '4.0.0',
     src: {
-      scss: path.join(paths.marmelad, 'bootstrap', '4.0.0-beta.3', 'scss'),
-      js: path.join(paths.marmelad, 'bootstrap', '4.0.0-beta.3', 'js'),
+      scss: path.join(paths.marmelad, 'bootstrap', '4.0.0', 'scss'),
+      js: path.join(paths.marmelad, 'bootstrap', '4.0.0', 'js'),
     },
     dest: {
       css: path.join(paths.storage, 'bootstrap', 'css'),
