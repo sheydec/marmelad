@@ -39,3 +39,67 @@
     }
 
 }());
+
+/* ^^^
+ * https://github.com/nk-components/time-now
+ * ========================================================================== */
+window.now = () => {
+  const perf = window && window.performance;
+
+  if (perf && perf.now) {
+    return perf.now();
+  }
+
+  return () => new Date().getTime();
+};
+
+
+/* ^^^
+ * https://github.com/nk-components/request-interval
+ * ========================================================================== */
+window.requestInterval = (fn, delay) => {
+  const data = {};
+  let start = Date.now();
+
+  data.id = requestAnimationFrame(loop);
+
+  return data;
+
+  function loop() {
+    data.id = requestAnimationFrame(loop);
+
+    if (Date.now() - start >= delay) {
+      fn();
+      start = Date.now();
+    }
+  }
+};
+
+window.clearRequestInterval = (data) => {
+  if (data) {
+    cancelAnimationFrame(data.id);
+  }
+};
+
+
+/* ^^^
+ * https://github.com/nk-components/request-timeout
+ * ========================================================================== */
+window.requestTimeout = (fn, delay, ctx) => {
+  const start = window.now();
+  const data = Object.create(null);
+
+  data.id = requestAnimationFrame(loop);
+
+  return data;
+
+  function loop() {
+    (window.now() - start) >= delay ? fn.call(ctx) : data.id = requestAnimationFrame(loop);
+  }
+};
+
+window.clearRequestTimeout = (data) => {
+  if (data) {
+    cancelAnimationFrame(data.id);
+  }
+};
