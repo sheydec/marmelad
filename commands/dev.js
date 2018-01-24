@@ -393,6 +393,7 @@ module.exports = (OPTS) => {
 
   gulp.task('bts4:sass', (done) => {
     gulp.src(path.join(settings.bootstrap.opts.src.scss, '[^_]*.scss'))
+      .pipe(plumber())
       .pipe(sourcemaps.init())
       .pipe(sass(settings.bootstrap.opts.sass))
       .pipe(postcss([
