@@ -122,6 +122,6 @@
     }
   },
   "scripts": {
-    "refresh": "rm -rf node_modules/ && rm -f package-lock.json && npm install && npm link"
+    "refresh-deps": "rm -rf node_modules/ && rm -f package-lock.json && npm install && npm link"
   }
 }
