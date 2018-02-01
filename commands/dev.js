@@ -6,6 +6,7 @@ const chalk = require('chalk');
 
 const gulp = require('gulp');
 const rename = require('gulp-rename');
+const flatten = require('gulp-flatten');
 
 const bsSP = require('browser-sync').create();
 const tap = require('gulp-tap');
@@ -74,13 +75,13 @@ module.exports = (OPTS) => {
       require('posthtml-postcss')([
         require('autoprefixer')(settings.app.autoprefixer),
         require('cssnano')(settings.app.cssnano),
-      ], {}, /^text\/css$/),
+      ], { from: 'undefined' }, /^text\/css$/),
     ];
 
     let templateName = '';
     let error = false;
 
-    const stream = gulp.src(path.join(settings.paths._pages, '**', '*.html'))
+    const stream = gulp.src(path.join(settings.paths._pages, '*.html'))
       .pipe(plumber())
       .pipe(gif(!isNunJucksUpdate, changed(settings.paths.dist)))
       .pipe(tap((file) => {
@@ -113,6 +114,9 @@ module.exports = (OPTS) => {
       .pipe(iconizer({ path: path.join(settings.paths.iconizer.src, 'sprite.svg'), _beml: settings.app.beml }))
       .pipe(pretty(settings.app.formatHtml))
       .pipe(postHTML(htmlPlugins))
+      .pipe(rename({
+        dirname: '',
+      }))
       .pipe(gulp.dest(settings.paths.dist));
 
     stream.on('end', () => {
@@ -205,6 +209,9 @@ module.exports = (OPTS) => {
         plugins: ['babel-plugin-transform-object-assign'].map(require.resolve),
         babelrc: false,
       }))
+      .pipe(rename({
+        dirname: '',
+      }))
       .pipe(gulp.dest(path.join(settings.paths.storage, settings.folders.js.src)));
 
     stream.on('end', () => {
@@ -231,6 +238,9 @@ module.exports = (OPTS) => {
     const stream = gulp.src(path.join(settings.paths.js.vendors, '**', '*.js'))
       .pipe(plumber())
       .pipe(changed(vendorsDist))
+      .pipe(rename({
+        dirname: '',
+      }))
       .pipe(gulp.dest(vendorsDist));
 
     stream.on('end', () => {
@@ -252,6 +262,9 @@ module.exports = (OPTS) => {
       .pipe(plumber())
       .pipe(concat('plugins.min.js'))
       .pipe(uglify())
+      .pipe(rename({
+        dirname: '',
+      }))
       .pipe(gulp.dest(path.join(settings.paths.storage, settings.folders.js.src)));
 
     stream.on('end', () => {
@@ -315,6 +328,9 @@ module.exports = (OPTS) => {
       .pipe(gif('*.min.css', postcss([
         cssnano(settings.app.cssnano),
       ])))
+      .pipe(rename({
+        dirname: '',
+      }))
       .pipe(gulp.dest(path.join(settings.paths.storage, 'css')))
       .on('end', () => {
         gutil.log(`Stylus CSS .......................... ${chalk.bold.green('Done')}`);
@@ -335,6 +351,9 @@ module.exports = (OPTS) => {
     ])
       .pipe(plumber())
       .pipe(changed(settings.paths.storage))
+      .pipe(rename((paths) => {
+        paths.dirname = paths.dirname.replace(settings.folders.marmelad, '').replace(settings.folders.static, '');
+      }))
       .pipe(gulp.dest(settings.paths.storage));
 
     stream.on('end', () => {
@@ -400,6 +419,9 @@ module.exports = (OPTS) => {
         autoprefixer(settings.bootstrap.opts.autoprefixer),
       ]))
       .pipe(sourcemaps.write('./'))
+      .pipe(rename({
+        dirname: '',
+      }))
       .pipe(gulp.dest(settings.bootstrap.opts.dest.css))
       .on('end', () => {
         gutil.log(`Bootstrap ${settings.bootstrap.opts.code} SASS ......... ${chalk.bold.green('Done')}`);
@@ -412,6 +434,9 @@ module.exports = (OPTS) => {
   gulp.task('bts4:js', (done) => {
     const stream = gulp.src(path.join(settings.bootstrap.opts.src.js, '**', '*.js'))
       .pipe(plumber())
+      .pipe(rename({
+        dirname: '',
+      }))
       .pipe(changed(path.join(settings.bootstrap.opts.dest.js)))
       .pipe(gulp.dest(settings.bootstrap.opts.dest.js));
 
