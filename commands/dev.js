@@ -81,7 +81,7 @@ module.exports = (OPTS) => {
     let templateName = '';
     let error = false;
 
-    const stream = gulp.src(path.join(settings.paths._pages, '*.html'))
+    const stream = gulp.src(`${settings.paths._pages}/**/*.html`)
       .pipe(plumber())
       .pipe(gif(!isNunJucksUpdate, changed(settings.paths.dist)))
       .pipe(tap((file) => {
@@ -198,7 +198,7 @@ module.exports = (OPTS) => {
    * scripts from blocks
    */
   gulp.task('scripts:others', (done) => {
-    const stream = gulp.src(path.join(settings.paths.js.src, '*.js'))
+    const stream = gulp.src(path.join(settings.paths.js.src, '*.js').replace(/\\/g, '/'))
       .pipe(plumber())
       .pipe(include({
         extensions: 'js',
@@ -235,7 +235,7 @@ module.exports = (OPTS) => {
       settings.folders.js.vendors,
     );
 
-    const stream = gulp.src(path.join(settings.paths.js.vendors, '**', '*.js'))
+    const stream = gulp.src(path.join(settings.paths.js.vendors, '**', '*.js').replace(/\\/g, '/'))
       .pipe(plumber())
       .pipe(changed(vendorsDist))
       .pipe(rename({
@@ -258,7 +258,7 @@ module.exports = (OPTS) => {
    * СКРИПТЫ ПЛАГИНОВ
    */
   gulp.task('scripts:plugins', (done) => {
-    const stream = gulp.src(path.join(settings.paths.js.plugins, '**', '*.js'))
+    const stream = gulp.src(path.join(settings.paths.js.plugins, '**', '*.js').replace(/\\/g, '/'))
       .pipe(plumber())
       .pipe(concat('plugins.min.js'))
       .pipe(uglify())
@@ -282,7 +282,7 @@ module.exports = (OPTS) => {
    * СТИЛИ ПЛАГИНОВ
    */
   gulp.task('styles:plugins', (done) => {
-    gulp.src(path.join(settings.paths.js.plugins, '**', '*.css'))
+    gulp.src(path.join(settings.paths.js.plugins, '**', '*.css').replace(/\\/g, '/'))
       .pipe(plumber())
       .pipe(concat('plugins.min.css'))
       .pipe(groupMQ())
@@ -317,7 +317,7 @@ module.exports = (OPTS) => {
 
     Object.assign($data, database.app.stylus);
 
-    gulp.src(path.join(settings.paths.stylus, '*.styl'))
+    gulp.src(path.join(settings.paths.stylus, '*.styl').replace(/\\/g, '/'))
       .pipe(plumber())
       .pipe(stylus({
         'include css': true,
@@ -345,7 +345,7 @@ module.exports = (OPTS) => {
    */
   gulp.task('static', (done) => {
     const stream = gulp.src([
-      path.join(settings.paths.static, '**', '*'),
+      `${settings.paths.static}/**/*.*`,
       `!${path.join(settings.paths.static, '**', 'Thumbs.db')}`,
       `!${path.join(settings.paths.static, '**', '*tmp*')}`,
     ])
@@ -411,7 +411,7 @@ module.exports = (OPTS) => {
   });
 
   gulp.task('bts4:sass', (done) => {
-    gulp.src(path.join(settings.bootstrap.opts.src.scss, '[^_]*.scss'))
+    gulp.src(path.join(settings.bootstrap.opts.src.scss, '[^_]*.scss').replace(/\\/g, '/'))
       .pipe(plumber())
       .pipe(sourcemaps.init())
       .pipe(sass(settings.bootstrap.opts.sass))
@@ -432,7 +432,7 @@ module.exports = (OPTS) => {
   });
 
   gulp.task('bts4:js', (done) => {
-    const stream = gulp.src(path.join(settings.bootstrap.opts.src.js, '**', '*.js'))
+    const stream = gulp.src(path.join(settings.bootstrap.opts.src.js, '**', '*.js').replace(/\\/g, '/'))
       .pipe(plumber())
       .pipe(rename({
         dirname: '',
