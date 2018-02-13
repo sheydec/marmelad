@@ -1,6 +1,6 @@
 {
   "name": "marmelad",
-  "version": "5.8.21",
+  "version": "6.0.0",
   "description": "Система сборки Фронтенда",
   "preferGlobal": true,
   "engines": {
