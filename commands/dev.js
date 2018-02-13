@@ -455,8 +455,8 @@ module.exports = (OPTS) => {
     const watchOpts = {
       ignoreInitial: true,
       ignored: [
-        path.join('**', 'Thumbs.db'),
-        path.join('**', '*tmp*'),
+        path.join('**', 'Thumbs.db').replace(/\\/g, '/'),
+        path.join('**', '*tmp*').replace(/\\/g, '/'),
       ],
       usePolling: true,
     };
@@ -465,14 +465,14 @@ module.exports = (OPTS) => {
     if (settings.bootstrap.use) {
       /* SCSS */
       gulp.watch(
-        path.join(settings.bootstrap.opts.src.scss, '**', '*.scss'),
+        path.join(settings.bootstrap.opts.src.scss, '**', '*.scss').replace(/\\/g, '/'),
         watchOpts,
         gulp.parallel('bts4:sass'),
       );
 
       /* JS */
       gulp.watch(
-        path.join(settings.bootstrap.opts.src.js, '**', '*.js'),
+        path.join(settings.bootstrap.opts.src.js, '**', '*.js').replace(/\\/g, '/'),
         watchOpts,
         gulp.parallel('bts4:js'),
       );
@@ -481,7 +481,7 @@ module.exports = (OPTS) => {
     /* СТАТИКА */
     gulp.watch(
       [
-        path.join(settings.paths.static, '**', '*'),
+        path.join(settings.paths.static, '**', '*').replace(/\\/g, '/'),
       ],
       Object.assign({}, watchOpts, {
         awaitWriteFinish: {
@@ -495,8 +495,8 @@ module.exports = (OPTS) => {
     /* STYLUS */
     gulp.watch(
       [
-        path.join(settings.paths._blocks, '**', '*.styl'),
-        path.join(settings.paths.stylus, '**', '*.styl'),
+        path.join(settings.paths._blocks, '**', '*.styl').replace(/\\/g, '/'),
+        path.join(settings.paths.stylus, '**', '*.styl').replace(/\\/g, '/'),
       ],
       watchOpts,
       gulp.parallel('stylus'),
@@ -504,45 +504,45 @@ module.exports = (OPTS) => {
 
     /* СКРИПТЫ */
     gulp.watch(
-      path.join(settings.paths.js.vendors, '**', '*.js'),
+      path.join(settings.paths.js.vendors, '**', '*.js').replace(/\\/g, '/'),
       watchOpts,
       gulp.parallel('scripts:vendors'),
     );
 
     gulp.watch(
-      path.join(settings.paths.js.plugins, '**', '*.js'),
+      path.join(settings.paths.js.plugins, '**', '*.js').replace(/\\/g, '/'),
       watchOpts,
       gulp.parallel('scripts:plugins'),
     );
 
     gulp.watch(
-      path.join(settings.paths.js.plugins, '**', '*.css'),
+      path.join(settings.paths.js.plugins, '**', '*.css').replace(/\\/g, '/'),
       watchOpts,
       gulp.parallel('styles:plugins'),
     );
 
     gulp.watch(
-      path.join(settings.paths._blocks, '**', '*.js'),
+      path.join(settings.paths._blocks, '**', '*.js').replace(/\\/g, '/'),
       watchOpts,
       gulp.parallel('scripts:others'),
     );
 
     gulp.watch(
-      path.join(settings.paths.js.src, '*.js'),
+      path.join(settings.paths.js.src, '*.js').replace(/\\/g, '/'),
       watchOpts,
       gulp.parallel('scripts:others'),
     );
 
     /* NunJucks Pages */
     gulp.watch(
-      path.join(settings.paths._pages, '**', '*.html'),
+      path.join(settings.paths._pages, '**', '*.html').replace(/\\/g, '/'),
       watchOpts,
       gulp.parallel('nunjucks'),
     );
 
     /* NunJucks Blocks */
     gulp.watch(
-      path.join(settings.paths._blocks, '**', '*.html'),
+      path.join(settings.paths._blocks, '**', '*.html').replace(/\\/g, '/'),
       watchOpts, (complete) => {
         isNunJucksUpdate = true;
 
@@ -552,14 +552,14 @@ module.exports = (OPTS) => {
 
     /* NunJucks database */
     gulp.watch(
-      path.join(settings.paths.marmelad, 'data.marmelad.js'),
+      path.join(settings.paths.marmelad, 'data.marmelad.js').replace(/\\/g, '/'),
       watchOpts,
       gulp.parallel('db:update'),
     );
 
     /* Iconizer */
     gulp.watch(
-      path.join(settings.paths.iconizer.icons, '*.svg'),
+      path.join(settings.paths.iconizer.icons, '*.svg').replace(/\\/g, '/'),
       watchOpts,
       gulp.parallel('iconizer:update'),
     );
