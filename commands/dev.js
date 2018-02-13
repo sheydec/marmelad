@@ -19,7 +19,6 @@ const frontMatter = require('gulp-front-matter');
 const translit = require('translit')(require('translit-russian'));
 
 const postHTML = require('gulp-posthtml');
-const pretty = require('../modules/gulp-pretty');
 const svgSprite = require('gulp-svg-sprite');
 
 const stylus = require('gulp-stylus');
@@ -111,7 +110,6 @@ module.exports = (OPTS) => {
         },
       }))
       .pipe(iconizer({ path: path.join(settings.paths.iconizer.src, 'sprite.svg'), _beml: settings.app.beml }))
-      .pipe(pretty(settings.app.formatHtml))
       .pipe(postHTML(htmlPlugins))
       .pipe(rename({
         dirname: '',
