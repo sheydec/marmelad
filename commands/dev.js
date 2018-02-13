@@ -6,7 +6,6 @@ const chalk = require('chalk');
 
 const gulp = require('gulp');
 const rename = require('gulp-rename');
-const flatten = require('gulp-flatten');
 
 const bsSP = require('browser-sync').create();
 const tap = require('gulp-tap');
