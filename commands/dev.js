@@ -68,14 +68,6 @@ module.exports = (OPTS) => {
    * NUNJUCKS
    */
   gulp.task('nunjucks', (done) => {
-    const htmlPlugins = [
-      require('posthtml-bem')(settings.app.beml),
-      require('posthtml-postcss')([
-        require('autoprefixer')(settings.app.autoprefixer),
-        require('cssnano')(settings.app.cssnano),
-      ], { from: 'undefined' }, /^text\/css$/),
-    ];
-
     let templateName = '';
     let error = false;
 
@@ -110,7 +102,9 @@ module.exports = (OPTS) => {
         },
       }))
       .pipe(iconizer({ path: path.join(settings.paths.iconizer.src, 'sprite.svg'), _beml: settings.app.beml }))
-      .pipe(postHTML(htmlPlugins))
+      .pipe(postHTML([
+        require('posthtml-bem')(settings.app.beml),
+      ]))
       .pipe(rename({
         dirname: '',
       }))
