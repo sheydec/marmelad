@@ -1,5 +1,4 @@
 const fs = require('fs');
-const CLI = require('commander');
 const path = require('path');
 const pkg = require('../package.json');
 const chalk = require('chalk');
