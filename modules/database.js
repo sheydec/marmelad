@@ -40,10 +40,9 @@ class Database {
       data = JSON.parse(fs.readFileSync(blockPath, 'utf8'));
       this.set(name, data);
     } catch (error) {
-      console.log();
-      console.log(blockPath);
-      console.log(error);
-      console.log();
+      if (typeof this.onError === 'function') {
+        this.onError.call(this, blockPath, error);
+      }
     }
   }
 
