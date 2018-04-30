@@ -82,6 +82,7 @@
     "gulp-remember": "^1.0.1",
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^4.0.1",
+    "gulp-sass-glob": "^1.0.9",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-stylus": "2.7.0",
     "gulp-svg-sprite": "1.4.0",
