@@ -1,8 +1,8 @@
 const fs = require('fs');
-const CLI = require('commander');
 const path = require('path');
 const pkg = require('../package.json');
 const chalk = require('chalk');
+const glob = require('glob');
 
 const gulp = require('gulp');
 const rename = require('gulp-rename');
@@ -45,6 +45,8 @@ const del = require('del');
 const boxen = require('boxen');
 const clipboardy = require('clipboardy');
 
+const db = new (require('../modules/database'))();
+
 const getAuthParams = params => (typeof params !== 'string' ? [pkg.name, false] : params.split('@'));
 const getIconsNamesList = iconsPath => fs.readdirSync(iconsPath).map(iconName => iconName.replace(/.svg/g, ''));
 const getNunJucksBlocks = blocksPath => fs.readdirSync(blocksPath).map(el => `${blocksPath}/${el}`);
@@ -60,7 +62,10 @@ module.exports = (OPTS) => {
     use: OPTS.auth,
   });
 
-  const settings = require(path.join(process.cwd(), 'marmelad', 'settings.marmelad'));
+  const settings = require(path.join(process.cwd(), 'marmelad', 'settings'));
+
+  console.log(typeof settings);
+
   let database = {};
   let isNunJucksUpdate = false;
 
@@ -68,14 +73,6 @@ module.exports = (OPTS) => {
    * NUNJUCKS
    */
   gulp.task('nunjucks', (done) => {
-    const htmlPlugins = [
-      require('posthtml-bem')(settings.app.beml),
-      require('posthtml-postcss')([
-        require('autoprefixer')(settings.app.autoprefixer),
-        require('cssnano')(settings.app.cssnano),
-      ], { from: 'undefined' }, /^text\/css$/),
-    ];
-
     let templateName = '';
     let error = false;
 
@@ -88,7 +85,7 @@ module.exports = (OPTS) => {
       .pipe(frontMatter())
       .pipe(nunjucks({
         searchPaths: getNunJucksBlocks(settings.paths._blocks),
-        locals: database,
+        locals: db.getStore(),
         ext: '.html',
 
         // TODO: https://gist.github.com/yunusga/1c5236331ddb6caa41a2a71928ac408a
@@ -110,7 +107,9 @@ module.exports = (OPTS) => {
         },
       }))
       .pipe(iconizer({ path: path.join(settings.paths.iconizer.src, 'sprite.svg'), _beml: settings.app.beml }))
-      .pipe(postHTML(htmlPlugins))
+      .pipe(postHTML([
+        require('posthtml-bem')(settings.app.beml),
+      ]))
       .pipe(rename({
         dirname: '',
       }))
@@ -564,6 +563,41 @@ module.exports = (OPTS) => {
     done();
   });
 
+  gulp.task('watch:db', (done) => {
+    db.onError = (blockPath, error) => {
+      console.log(blockPath);
+      console.log(error);
+    };
+
+    db.set('package', pkg);
+    db.set('settings', settings);
+
+    db.create(glob.sync('marmelad/_blocks/**/*.json'));
+    db.create(glob.sync('marmelad/global.json'));
+
+    gulp.watch([
+      'marmelad/_blocks/**/*.*json',
+      'marmelad/global.json',
+    ], {
+      usePolling: true,
+    })
+      .on('change', (block) => {
+        db.update(block);
+        // gulp.series('nunjucks')();
+      })
+      .on('unlink', (block) => {
+        db.delete(block);
+        // gulp.series('nunjucks')();
+      });
+
+    gutil.log('Database Done');
+
+    console.log(db.store);
+
+    done();
+  });
+
+
   /**
    * очищаем папку сборки перед сборкой Ж)
    */
@@ -579,7 +613,7 @@ module.exports = (OPTS) => {
     gulp.series(
       'clean',
       'server:static',
-      'db',
+      'watch:db',
       'nunjucks',
       'stylus',
       gulp.parallel(
@@ -595,5 +629,11 @@ module.exports = (OPTS) => {
     ),
   );
 
-  gulp.series('development')();
+  // gulp.series('development')();
+
+  gulp.task('develop', () => {
+    gulp.series('watch:db')();
+  });
+
+  gulp.series('develop')();
 };
