@@ -45,7 +45,6 @@ const decache = require('decache');
 const pipeErrorStop = require('pipe-error-stop');
 const del = require('del');
 const boxen = require('boxen');
-const clipboardy = require('clipboardy');
 
 const db = new (require('../modules/database'))();
 
@@ -370,7 +369,6 @@ module.exports = (OPTS) => {
    */
   gulp.task('server:static', (done) => {
     bsSP.init(settings.app.bsSP, () => {
-      const urls = bsSP.getOption('urls');
       const bsAuth = bsSP.getOption('bsAuth');
 
       let authString = '';
@@ -379,14 +377,7 @@ module.exports = (OPTS) => {
         authString = `\n\nuser: ${bsAuth.user}\npass: ${bsAuth.pass}`;
       }
 
-      let clipboardMsg = '';
-
-      if (OPTS.clipboard) {
-        clipboardMsg = `\n\n${chalk.bold.green(urls.get('local'))} сopied to clipboard!${authString}`;
-        clipboardy.writeSync(urls.get('local'));
-      }
-
-      console.log(boxen(`${chalk.bold.yellow(pkg.name.toUpperCase())} v${pkg.version} is Started!${clipboardMsg}`, {
+      console.log(boxen(`${chalk.bold.yellow(pkg.name.toUpperCase())} v${pkg.version} is Started!${authString}`, {
         padding: 1,
         margin: 0,
         borderStyle: 'double',
