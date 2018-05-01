@@ -1,6 +1,6 @@
 {
-  "name": "marmelad",
-  "version": "6.0.0",
+  "name": "a101",
+  "version": "6.1.0",
   "description": "Система сборки Фронтенда",
   "preferGlobal": true,
   "engines": {
