@@ -1,11 +1,23 @@
 const fs = require('fs');
 const path = require('path');
 
-if (fs.existsSync(path.join('marmelad', 'tci'))) {
-  console.log();
-  console.log('project is already initialized');
 
-  process.exit();
-}
+module.exports = (dir) => {
+  dir = dir || '';
 
-require('../tasks/init');
+  if (dir.length && fs.existsSync(dir)) {
+    console.log();
+    console.log(`${dir} - directory is already exists`);
+    console.log();
+    process.exit();
+  }
+
+  if (!dir.length && fs.existsSync('tci')) {
+    console.log();
+    console.log('project is already initialized');
+    console.log();
+    process.exit();
+  }
+
+  require('../tasks/init')(dir);
+};

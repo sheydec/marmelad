@@ -21,10 +21,10 @@ CLI
 
 // инициализация нового проекта
 CLI
-  .command('init')
+  .command('init [dir]')
   .description('Initialize new project')
-  .action(() => {
-    require('../commands/init');
+  .action((dir) => {
+    require('../commands/init')(dir);
   })
   .on('--help', () => {
     console.log();
