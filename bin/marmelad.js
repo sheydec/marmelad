@@ -8,7 +8,7 @@ const CLI = require('commander');
  * Установка флагов/параметров для командной строки
  */
 CLI
-  .version(PKG.version)
+  .version(PKG.version, '-v, --version')
   .description(PKG.description)
   .on('--help', () => {
     console.log('\n  Examples:');
