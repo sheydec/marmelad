@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 const chokidar = require('chokidar');
 const CMD = require('cmd-exec').init();
 
@@ -8,12 +7,12 @@ function run(options) {
     usePolling: true,
   }, options);
 
-  const tciFilePath = path.join('marmelad', 'tci');
+  const tciFilePath = 'tci';
   const TCIWatcher = chokidar.watch(tciFilePath, opts);
 
   TCIWatcher.on('change', (file) => {
     const text = fs.readFileSync(file, { encoding: 'utf8' }).replace(/\n+$/m, '');
-    const commands = text.split('\n').map(item => `mmd ${item}`);
+    const commands = text.split('\n').map(item => `a101 ${item}`);
 
     CMD
       .exec(commands.join(' && '))
