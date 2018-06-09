@@ -14,21 +14,21 @@ const iconizer = require('../modules/gulp-iconizer');
 const babel = require('gulp-babel');
 const uglify = require('gulp-uglify');
 
-const nunjucks = require('gulp-nunjucks-html');
+const nunjucks = require('../modules/gulp/nunjucks');
 const frontMatter = require('gulp-front-matter');
-const translit = require('translit')(require('translit-russian'));
 
 const postHTML = require('gulp-posthtml');
 const svgSprite = require('gulp-svg-sprite');
 
+const sassGlob = require('gulp-sass-glob');
+const sass = require('gulp-sass');
 const stylus = require('gulp-stylus');
+const less = require('gulp-less');
 const postcss = require('gulp-postcss');
 const focus = require('postcss-focus');
 const flexBugsFixes = require('postcss-flexbugs-fixes');
 const momentumScrolling = require('postcss-momentum-scrolling');
 const autoprefixer = require('autoprefixer');
-const cssnano = require('cssnano');
-const sass = require('gulp-sass');
 
 const sourcemaps = require('gulp-sourcemaps');
 const gif = require('gulp-if');
@@ -41,10 +41,8 @@ const changed = require('gulp-changed');
 const concat = require('gulp-concat');
 const include = require('gulp-include');
 
-const decache = require('decache');
 const pipeErrorStop = require('pipe-error-stop');
 const del = require('del');
-const boxen = require('boxen');
 
 const db = new (require('../modules/database'))();
 
@@ -63,61 +61,56 @@ module.exports = (OPTS) => {
     use: OPTS.auth,
   });
 
-  const settings = require(path.join(process.cwd(), 'marmelad', 'settings'));
+  const settings = require(path.join(process.cwd(), 'settings.js'));
 
-  console.log(typeof settings);
+  const postcssPlugins = [
+    momentumScrolling(),
+    focus(),
+    flexBugsFixes(),
+    autoprefixer(settings.AUTOPREFIXER),
+  ];
 
-  let database = {};
   let isNunJucksUpdate = false;
 
   /**
    * NUNJUCKS
    */
   gulp.task('nunjucks', (done) => {
-    let templateName = '';
-    let error = false;
+    log('nunjucks start');
 
-    const stream = gulp.src(`${settings.paths._pages}/**/*.html`)
+    let templateName = '';
+
+    const stream = gulp.src(settings.SETUP.pages.src)
       .pipe(plumber())
-      .pipe(gif(!isNunJucksUpdate, changed(settings.paths.dist)))
+      .pipe(gif(!isNunJucksUpdate, changed(settings.SETUP.pages.dest)))
       .pipe(tap((file) => {
         templateName = path.basename(file.path);
       }))
       .pipe(frontMatter())
       .pipe(nunjucks({
-        searchPaths: getNunJucksBlocks(settings.paths._blocks),
-        locals: db.getStore(),
+        searchPaths: getNunJucksBlocks(settings.FOLDERS.blocks),
+        locals: db.store,
         ext: '.html',
-
-        // TODO: https://gist.github.com/yunusga/1c5236331ddb6caa41a2a71928ac408a
-
         setUp(env) {
-          env.addFilter('translit', str => translit(str).replace(/ /, '_').toLowerCase());
-          env.addFilter('limitTo', require('../modules/njk-limitTo'));
+          env.addFilter('limitto', require('../modules/nunjucks/limitto'));
           return env;
         },
       }))
       .pipe(pipeErrorStop({
         errorCallback: (err) => {
-          error = true;
-          console.log(`\n${err.name}: ${err.message.replace(/(unknown path)/, templateName)}\n`);
+          log.error(`${chalk.red(err.message)} in ${chalk.yellow(templateName)}`);
         },
         successCallback: () => {
-          error = false;
           isNunJucksUpdate = false;
         },
       }))
-      .pipe(iconizer({ path: path.join(settings.paths.iconizer.src, 'sprite.svg'), _beml: settings.app.beml }))
       .pipe(postHTML([
-        require('posthtml-bem')(settings.app.beml),
+        require('posthtml-bem')(settings.BEML),
       ]))
-      .pipe(rename({
-        dirname: '',
-      }))
-      .pipe(gulp.dest(settings.paths.dist));
+      .pipe(gulp.dest(settings.SETUP.pages.dest));
 
     stream.on('end', () => {
-      log(`NunJucks ${chalk.gray('............................')} ${error ? chalk.bold.red('ERROR\n') : chalk.bold.green('Done')}`);
+      log('nunjucks end');
       bsSP.reload();
       done();
     });
@@ -128,36 +121,32 @@ module.exports = (OPTS) => {
   });
 
   /**
-   * DB
+   * project styles
    */
-  gulp.task('db', (done) => {
-    const dataPath = path.join(process.cwd(), 'marmelad', 'data.marmelad.js');
+  gulp.task('styles', (done) => {
+    const { styles } = settings.SETUP;
 
-    decache(dataPath);
+    gulp.src(styles.src)
+      .pipe(plumber())
+      .pipe(gif('*.styl', stylus({
+        'include css': true,
+        // rawDefine : { $data }
+      })))
+      .pipe(gif('*.less', less()))
+      .pipe(gif('*.scss', sassGlob()))
+      .pipe(gif('*.scss', sass()))
+      .pipe(gif('*.sass', sass({
+        indentedSyntax: true,
+      })))
+      .pipe(groupMQ())
+      .pipe(postcss(postcssPlugins))
+      .pipe(gulp.dest(styles.dest))
+      .pipe(bsSP.stream());
 
-    database = require(dataPath);
-
-    Object.assign(database.app, {
-      settings,
-      package: pkg,
-      storage: settings.folders.storage,
-      icons: getIconsNamesList(settings.paths.iconizer.icons),
-    });
-
-    isNunJucksUpdate = true;
-
-    log(`DB for templates .................... ${chalk.bold.yellow('Refreshed')}`);
+    log('styles done');
 
     done();
   });
-
-  /**
-   * DB:update
-   */
-  gulp.task('db:update', (done) => {
-    gulp.series('db', 'stylus', 'nunjucks')(done);
-  });
-
 
   /**
    * Iconizer
@@ -286,7 +275,6 @@ module.exports = (OPTS) => {
       .pipe(postcss([
         focus(),
         flexBugsFixes(),
-        cssnano({ zindex: false }),
       ]))
       .pipe(gulp.dest(path.join(settings.paths.storage, 'css')))
       .on('end', () => {
@@ -298,63 +286,18 @@ module.exports = (OPTS) => {
   });
 
   /**
-   * сборка стилей блоков, для каждого отдельный css
+   * Root Files
    */
-  gulp.task('stylus', (done) => {
-    const postcssPlugins = [
-      momentumScrolling({ short: true }),
-      focus(),
-      flexBugsFixes(),
-      autoprefixer(settings.app.autoprefixer),
-    ];
+  gulp.task('root', (done) => {
+    const { root } = settings.SETUP;
 
-    const $data = {
-      beml: settings.app.beml,
-    };
-
-    Object.assign($data, database.app.stylus);
-
-    gulp.src(path.join(settings.paths.stylus, '*.styl').replace(/\\/g, '/'))
+    const stream = gulp.src(root.src)
       .pipe(plumber())
-      .pipe(stylus({
-        'include css': true,
-        rawDefine: { $data },
-      }))
-      .pipe(groupMQ())
-      .pipe(postcss(postcssPlugins))
-      .pipe(gif('*.min.css', postcss([
-        cssnano(settings.app.cssnano),
-      ])))
-      .pipe(rename({
-        dirname: '',
-      }))
-      .pipe(gulp.dest(path.join(settings.paths.storage, 'css')))
-      .on('end', () => {
-        log(`Stylus CSS .......................... ${chalk.bold.green('Done')}`);
-      })
-      .pipe(bsSP.stream());
-
-    done();
-  });
-
-  /**
-   * СТАТИКА
-   */
-  gulp.task('static', (done) => {
-    const stream = gulp.src([
-      `${settings.paths.static}/**/*.*`,
-      `!${path.join(settings.paths.static, '**', 'Thumbs.db')}`,
-      `!${path.join(settings.paths.static, '**', '*tmp*')}`,
-    ])
-      .pipe(plumber())
-      .pipe(changed(settings.paths.storage))
-      .pipe(rename((paths) => {
-        paths.dirname = paths.dirname.replace(settings.folders.marmelad, '').replace(settings.folders.static, '');
-      }))
-      .pipe(gulp.dest(settings.paths.storage));
+      .pipe(changed(root.dest))
+      .pipe(gulp.dest(root.dest));
 
     stream.on('end', () => {
-      log(`Static files copy ................... ${chalk.bold.green('Done')}`);
+      log('root files done');
       bsSP.reload();
       done();
     });
@@ -367,70 +310,59 @@ module.exports = (OPTS) => {
   /**
    * static server
    */
-  gulp.task('server:static', (done) => {
-    bsSP.init(settings.app.bsSP, () => {
-      const bsAuth = bsSP.getOption('bsAuth');
+  gulp.task('server', (done) => {
+    bsSP.init(settings.SERVER, () => {
+      // const bsAuth = bsSP.getOption('bsAuth');
 
-      let authString = '';
+      // let authString = '';
 
-      if (bsAuth && bsAuth.use) {
-        authString = `\n\nuser: ${bsAuth.user}\npass: ${bsAuth.pass}`;
-      }
+      // if (bsAuth && bsAuth.use) {
+      //   authString = `\n\nuser: ${bsAuth.user}\npass: ${bsAuth.pass}`;
+      // }
 
-      console.log(boxen(`${chalk.bold.yellow(pkg.name.toUpperCase())} v${pkg.version} is Started!${authString}`, {
-        padding: 1,
-        margin: 0,
-        borderStyle: 'double',
-        borderColor: 'green',
-      }));
+      // console.log(boxen(`${chalk.bold.yellow(pkg.name.toUpperCase())} v${pkg.version} is Started!${authString}`, {
+      //   padding: 1,
+      //   margin: 0,
+      //   borderStyle: 'double',
+      //   borderColor: 'green',
+      // }));
 
       done();
     });
   });
 
-  /** ^^^
-   * Bootstrap 4.0.0-beta.2 tasks
-   ==================================================================== */
-  gulp.task('bootstrap', (done) => {
-    if (settings.bootstrap.use) {
-      gulp.series('bts4:sass', 'bts4:js')(done);
-    } else {
-      done();
-    }
-  });
+  gulp.task('bootstrap:scss', (done) => {
+    const { bootstrap } = settings.SETUP;
 
-  gulp.task('bts4:sass', (done) => {
-    gulp.src(path.join(settings.bootstrap.opts.src.scss, '[^_]*.scss').replace(/\\/g, '/'))
+    log('bootstrap scss start');
+
+    gulp.src(bootstrap.scss.src)
       .pipe(plumber())
       .pipe(sourcemaps.init())
-      .pipe(sass(settings.bootstrap.opts.sass))
+      .pipe(sass(bootstrap.scss.opts))
       .pipe(postcss([
-        autoprefixer(settings.bootstrap.opts.autoprefixer),
+        autoprefixer(settings.AUTOPREFIXER),
       ]))
       .pipe(sourcemaps.write('./'))
-      .pipe(rename({
-        dirname: '',
-      }))
-      .pipe(gulp.dest(settings.bootstrap.opts.dest.css))
+      .pipe(gulp.dest(bootstrap.scss.dest))
       .on('end', () => {
-        log(`Bootstrap ${settings.bootstrap.opts.code} SASS ......... ${chalk.bold.green('Done')}`);
+        log('bootstrap scss finish');
       })
       .pipe(bsSP.stream());
 
     done();
   });
 
-  gulp.task('bts4:js', (done) => {
-    const stream = gulp.src(path.join(settings.bootstrap.opts.src.js, '**', '*.js').replace(/\\/g, '/'))
+  gulp.task('bootstrap:js', (done) => {
+    const { bootstrap } = settings.SETUP;
+
+    const stream = gulp.src(bootstrap.js.src)
       .pipe(plumber())
-      .pipe(rename({
-        dirname: '',
-      }))
-      .pipe(changed(path.join(settings.bootstrap.opts.dest.js)))
-      .pipe(gulp.dest(settings.bootstrap.opts.dest.js));
+      .pipe(changed(path.join(bootstrap.js.dest)))
+      .pipe(gulp.dest(bootstrap.js.dest));
 
     stream.on('end', () => {
-      log(`Bootstrap ${settings.bootstrap.opts.code} JS ........... ${chalk.bold.green('Done')}`);
+      log('bootstrap js done');
       bsSP.reload();
       done();
     });
@@ -441,151 +373,155 @@ module.exports = (OPTS) => {
   });
 
   gulp.task('watch', (done) => {
-    const watchOpts = {
-      ignoreInitial: true,
-      ignored: [
-        path.join('**', 'Thumbs.db').replace(/\\/g, '/'),
-        path.join('**', '*tmp*').replace(/\\/g, '/'),
-      ],
-      usePolling: true,
-    };
+    const { SETUP } = settings;
 
-    /* bootstrap */
-    if (settings.bootstrap.use) {
-      /* SCSS */
-      gulp.watch(
-        path.join(settings.bootstrap.opts.src.scss, '**', '*.scss').replace(/\\/g, '/'),
-        watchOpts,
-        gulp.parallel('bts4:sass'),
-      );
-
-      /* JS */
-      gulp.watch(
-        path.join(settings.bootstrap.opts.src.js, '**', '*.js').replace(/\\/g, '/'),
-        watchOpts,
-        gulp.parallel('bts4:js'),
-      );
-    }
-
-    /* СТАТИКА */
+    // watch for nunjucks pages
     gulp.watch(
-      [
-        path.join(settings.paths.static, '**', '*').replace(/\\/g, '/'),
-      ],
-      Object.assign({}, watchOpts, {
-        awaitWriteFinish: {
-          stabilityThreshold: 1000,
-          pollInterval: 300,
-        },
-      }),
-      gulp.parallel('static'),
-    );
-
-    /* STYLUS */
-    gulp.watch(
-      [
-        path.join(settings.paths._blocks, '**', '*.styl').replace(/\\/g, '/'),
-        path.join(settings.paths.stylus, '**', '*.styl').replace(/\\/g, '/'),
-      ],
-      watchOpts,
-      gulp.parallel('stylus'),
-    );
-
-    /* СКРИПТЫ */
-    gulp.watch(
-      path.join(settings.paths.js.vendors, '**', '*.js').replace(/\\/g, '/'),
-      watchOpts,
-      gulp.parallel('scripts:vendors'),
-    );
-
-    gulp.watch(
-      path.join(settings.paths.js.plugins, '**', '*.js').replace(/\\/g, '/'),
-      watchOpts,
-      gulp.parallel('scripts:plugins'),
-    );
-
-    gulp.watch(
-      path.join(settings.paths.js.plugins, '**', '*.css').replace(/\\/g, '/'),
-      watchOpts,
-      gulp.parallel('styles:plugins'),
-    );
-
-    gulp.watch(
-      path.join(settings.paths._blocks, '**', '*.js').replace(/\\/g, '/'),
-      watchOpts,
-      gulp.parallel('scripts:others'),
-    );
-
-    gulp.watch(
-      path.join(settings.paths.js.src, '*.js').replace(/\\/g, '/'),
-      watchOpts,
-      gulp.parallel('scripts:others'),
-    );
-
-    /* NunJucks Pages */
-    gulp.watch(
-      path.join(settings.paths._pages, '**', '*.html').replace(/\\/g, '/'),
-      watchOpts,
+      SETUP.pages.watch,
+      SETUP.watchOpts,
       gulp.parallel('nunjucks'),
     );
 
-    /* NunJucks Blocks */
+    // watch for nunjucks blocks
     gulp.watch(
-      path.join(settings.paths._blocks, '**', '*.html').replace(/\\/g, '/'),
-      watchOpts, (complete) => {
+      SETUP.blocks.watch,
+      SETUP.watchOpts,
+      (complete) => {
         isNunJucksUpdate = true;
-
         gulp.series('nunjucks')(complete);
       },
     );
 
-    /* NunJucks database */
+    // watch for bootstrap js
     gulp.watch(
-      path.join(settings.paths.marmelad, 'data.marmelad.js').replace(/\\/g, '/'),
-      watchOpts,
-      gulp.parallel('db:update'),
+      SETUP.bootstrap.js.watch,
+      SETUP.watchOpts,
+      gulp.parallel('bootstrap:js'),
     );
 
-    /* Iconizer */
+    // watch for bootstrap scss
     gulp.watch(
-      path.join(settings.paths.iconizer.icons, '*.svg').replace(/\\/g, '/'),
-      watchOpts,
-      gulp.parallel('iconizer:update'),
+      SETUP.bootstrap.scss.watch,
+      SETUP.watchOpts,
+      gulp.parallel('bootstrap:scss'),
     );
+
+    // watch for project styles
+    gulp.watch(
+      SETUP.styles.watch,
+      SETUP.watchOpts,
+      gulp.parallel('styles'),
+    );
+
+    // watch for blocks styles
+    gulp.watch(
+      SETUP.styles.blocks,
+      SETUP.watchOpts,
+      gulp.parallel('styles'),
+    );
+
+    // fatch for root files
+    gulp.watch(
+      SETUP.root.watch,
+      SETUP.watchOpts,
+      gulp.parallel('root'),
+    );
+
+    /* СТАТИКА */
+    // gulp.watch(
+    //   [
+    //     path.join(settings.paths.static, '**', '*').replace(/\\/g, '/'),
+    //   ],
+    //   Object.assign({}, watchOpts, {
+    //     awaitWriteFinish: {
+    //       stabilityThreshold: 1000,
+    //       pollInterval: 300,
+    //     },
+    //   }),
+    //   gulp.parallel('static'),
+    // );
+
+    // /* STYLUS */
+    // gulp.watch(
+    //   [
+    //     path.join(settings.paths._blocks, '**', '*.styl').replace(/\\/g, '/'),
+    //     path.join(settings.paths.stylus, '**', '*.styl').replace(/\\/g, '/'),
+    //   ],
+    //   watchOpts,
+    //   gulp.parallel('stylus'),
+    // );
+
+    /* СКРИПТЫ */
+    // gulp.watch(
+    //   path.join(settings.paths.js.vendors, '**', '*.js').replace(/\\/g, '/'),
+    //   watchOpts,
+    //   gulp.parallel('scripts:vendors'),
+    // );
+
+    // gulp.watch(
+    //   path.join(settings.paths.js.plugins, '**', '*.js').replace(/\\/g, '/'),
+    //   watchOpts,
+    //   gulp.parallel('scripts:plugins'),
+    // );
+
+    // gulp.watch(
+    //   path.join(settings.paths.js.plugins, '**', '*.css').replace(/\\/g, '/'),
+    //   watchOpts,
+    //   gulp.parallel('styles:plugins'),
+    // );
+
+    // gulp.watch(
+    //   path.join(settings.paths._blocks, '**', '*.js').replace(/\\/g, '/'),
+    //   watchOpts,
+    //   gulp.parallel('scripts:others'),
+    // );
+
+    // gulp.watch(
+    //   path.join(settings.paths.js.src, '*.js').replace(/\\/g, '/'),
+    //   watchOpts,
+    //   gulp.parallel('scripts:others'),
+    // );
+
+    /* Iconizer */
+    // gulp.watch(
+    //   path.join(settings.paths.iconizer.icons, '*.svg').replace(/\\/g, '/'),
+    //   watchOpts,
+    //   gulp.parallel('iconizer:update'),
+    // );
 
     done();
   });
 
-  gulp.task('watch:db', (done) => {
+  gulp.task('database', (done) => {
+    const DATA = settings.SETUP.database;
+    const { watchOpts } = settings.SETUP;
+
     db.onError = (blockPath, error) => {
-      console.log(blockPath);
-      console.log(error);
+      log.error(chalk.bold.red(blockPath));
+      log.error(error.message);
     };
 
     db.set('package', pkg);
     db.set('settings', settings);
 
-    db.create(glob.sync('marmelad/_blocks/**/*.json'));
-    db.create(glob.sync('marmelad/global.json'));
+    DATA.watch.forEach((paths) => {
+      db.create(glob.sync(paths));
+    });
 
-    gulp.watch([
-      'marmelad/_blocks/**/*.*json',
-      'marmelad/global.json',
-    ], {
-      usePolling: true,
-    })
+    gulp.watch(
+      DATA.watch,
+      watchOpts,
+    )
       .on('change', (block) => {
         db.update(block);
-        // gulp.series('nunjucks')();
+        gulp.series('nunjucks')();
       })
       .on('unlink', (block) => {
         db.delete(block);
-        // gulp.series('nunjucks')();
+        gulp.series('nunjucks')();
       });
 
-    log('Database Done');
-
-    console.log(db.store);
+    log.info('Data for templates loaded');
 
     done();
   });
@@ -597,36 +533,49 @@ module.exports = (OPTS) => {
   gulp.task('clean', (done) => {
     log('Clean up files...');
 
-    del.sync(settings.paths.dist);
+    del.sync(settings.FOLDERS.dev);
     done();
   });
 
+  // gulp.task(
+  //   'development',
+  //   gulp.series(
+  //     'clean',
+  //     'server',
+  //     'database',
+  //     'nunjucks',
+  //     'stylus',
+  //     gulp.parallel(
+  //       'static',
+  //       'iconizer',
+  //       'scripts:vendors',
+  //       'scripts:plugins',
+  //       'scripts:others',
+  //       'styles:plugins',
+  //       'bootstrap',
+  //     ),
+  //     'watch',
+  //   ),
+  // );
+
+  // gulp.series('development')();
+
   gulp.task(
-    'development',
+    'develop',
     gulp.series(
       'clean',
-      'server:static',
-      'watch:db',
-      'nunjucks',
-      'stylus',
+      'server',
+      'database',
       gulp.parallel(
-        'static',
-        'iconizer',
-        'scripts:vendors',
-        'scripts:plugins',
-        'scripts:others',
-        'styles:plugins',
-        'bootstrap',
+        'nunjucks',
+        'styles',
+        'root',
+        'bootstrap:js',
+        'bootstrap:scss',
       ),
       'watch',
     ),
   );
-
-  // gulp.series('development')();
-
-  gulp.task('develop', () => {
-    gulp.series('watch:db')();
-  });
 
   gulp.series('develop')();
 };
