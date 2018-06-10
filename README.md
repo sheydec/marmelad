@@ -89,11 +89,6 @@ gulp -v
 - posthtml-[postcss](https://github.com/posthtml/posthtml-postcss)
 - Фильтр [limitTo](https://gist.github.com/yunusga/1c5236331ddb6caa41a2a71928ac408a)
 
-## Roadmap
-
-- `stylus` Добавить миксин для перекрашивания инлайновых SVG иконок
-
-
 ## Создание проекта
 
 Есть два способа создания проекта
@@ -101,8 +96,11 @@ gulp -v
 - `a101 init` - установится в текущую папку
 - `a101 init new-project` - установится в папку `new-project`
 
+## Стили
 
-## Плагины PostCSS
+Сбощик поддерживает работу с `sass`, `scss`, `stylus`, `less`
+
+### Плагины PostCSS
 
 - [postcss-focus]
 - [postcss-flexbugs-fixes]
