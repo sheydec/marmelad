@@ -28,6 +28,8 @@ const postcss = require('gulp-postcss');
 const focus = require('postcss-focus');
 const flexBugsFixes = require('postcss-flexbugs-fixes');
 const momentumScrolling = require('postcss-momentum-scrolling');
+const easingGradients = require('postcss-easing-gradients');
+const inlineSvg = require('postcss-inline-svg');
 const autoprefixer = require('autoprefixer');
 
 const sourcemaps = require('gulp-sourcemaps');
@@ -67,6 +69,8 @@ module.exports = (OPTS) => {
     momentumScrolling(),
     focus(),
     flexBugsFixes(),
+    inlineSvg(),
+    easingGradients(),
     autoprefixer(settings.AUTOPREFIXER),
   ];
 
