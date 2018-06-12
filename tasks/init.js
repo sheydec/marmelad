@@ -11,7 +11,7 @@ module.exports = (initPath) => {
       .pipe(gulp.dest(path.join(process.cwd(), initPath)));
 
     stream.on('end', () => {
-      console.log(`\n${PKG.name.toUpperCase()} v${PKG.version} initialized\n\ntype ${PKG.name} --help for CLI help`);
+      console.log(`\n${PKG.name.toUpperCase()} v${PKG.version} initialized\ntype ${PKG.name} --help for CLI help\n`);
 
       done();
     });
