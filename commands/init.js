@@ -1,6 +1,4 @@
 const fs = require('fs');
-const path = require('path');
-
 
 module.exports = (dir) => {
   dir = dir || '';
@@ -12,7 +10,7 @@ module.exports = (dir) => {
     process.exit();
   }
 
-  if (!dir.length && fs.existsSync('tci')) {
+  if (!dir.length && fs.existsSync('marmelad/tci')) {
     console.log();
     console.log('project is already initialized');
     console.log();

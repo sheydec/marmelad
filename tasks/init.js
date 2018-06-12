@@ -8,7 +8,7 @@ module.exports = (initPath) => {
       [path.join(__dirname.replace('tasks', ''), 'boilerplate', '**', '*')],
       { dot: true },
     )
-      .pipe(gulp.dest(path.join(process.cwd(), initPath)));
+      .pipe(gulp.dest(path.join(process.cwd(), initPath, 'marmelad')));
 
     stream.on('end', () => {
       console.log(`\n${PKG.name.toUpperCase()} v${PKG.version} initialized\ntype ${PKG.name} --help for CLI help\n`);
