@@ -335,6 +335,35 @@ module.exports = (OPTS) => {
     });
   });
 
+  gulp.task('bootstrap', (done) => {
+    const { SETUP } = settings;
+
+    if (SETUP.bootstrap.use) {
+      log('bootstrap started');
+
+      gulp.parallel(
+        'bootstrap:js',
+        'bootstrap:scss',
+      )();
+
+      // watch for bootstrap js
+      gulp.watch(
+        SETUP.bootstrap.js.watch,
+        SETUP.watchOpts,
+        gulp.parallel('bootstrap:js'),
+      );
+
+      // watch for bootstrap scss
+      gulp.watch(
+        SETUP.bootstrap.scss.watch,
+        SETUP.watchOpts,
+        gulp.parallel('bootstrap:scss'),
+      );
+    }
+
+    done();
+  });
+
   gulp.task('bootstrap:scss', (done) => {
     const { bootstrap } = settings.SETUP;
 
@@ -394,20 +423,6 @@ module.exports = (OPTS) => {
         isNunJucksUpdate = true;
         gulp.series('nunjucks')(complete);
       },
-    );
-
-    // watch for bootstrap js
-    gulp.watch(
-      SETUP.bootstrap.js.watch,
-      SETUP.watchOpts,
-      gulp.parallel('bootstrap:js'),
-    );
-
-    // watch for bootstrap scss
-    gulp.watch(
-      SETUP.bootstrap.scss.watch,
-      SETUP.watchOpts,
-      gulp.parallel('bootstrap:scss'),
     );
 
     // watch for project styles
@@ -574,8 +589,7 @@ module.exports = (OPTS) => {
         'nunjucks',
         'styles',
         'root',
-        'bootstrap:js',
-        'bootstrap:scss',
+        'bootstrap',
       ),
       'watch',
     ),
