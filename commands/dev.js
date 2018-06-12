@@ -92,7 +92,7 @@ module.exports = (OPTS) => {
       }))
       .pipe(frontMatter())
       .pipe(nunjucks({
-        searchPaths: getNunJucksBlocks(settings.FOLDERS.blocks),
+        searchPaths: getNunJucksBlocks(settings.SETUP.blocks.paths),
         locals: db.store,
         ext: '.html',
         setUp(env) {
