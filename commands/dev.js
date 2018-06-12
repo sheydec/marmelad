@@ -63,7 +63,7 @@ module.exports = (OPTS) => {
     use: OPTS.auth,
   });
 
-  const settings = require(path.join(process.cwd(), 'settings.js'));
+  const settings = require(path.join(process.cwd(), 'marmelad', 'settings.js'));
 
   const postcssPlugins = [
     momentumScrolling(),
