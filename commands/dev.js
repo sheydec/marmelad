@@ -30,6 +30,7 @@ const flexBugsFixes = require('postcss-flexbugs-fixes');
 const momentumScrolling = require('postcss-momentum-scrolling');
 const easingGradients = require('postcss-easing-gradients');
 const inlineSvg = require('postcss-inline-svg');
+const presetEnv = require('postcss-preset-env');
 const autoprefixer = require('autoprefixer');
 
 const sourcemaps = require('gulp-sourcemaps');
@@ -66,6 +67,7 @@ module.exports = (OPTS) => {
   const settings = require(path.join(process.cwd(), 'marmelad', 'settings.js'));
 
   const postcssPlugins = [
+    presetEnv(),
     momentumScrolling(),
     focus(),
     flexBugsFixes(),
